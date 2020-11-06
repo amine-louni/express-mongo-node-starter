@@ -16,18 +16,27 @@ process.on('uncaughtException', (err) => {
 });
 const app = require('./app');
 
-const DB = process.env.DB.replace('<PASSWORD>', process.env.DB_PASSWORD);
+const DB_URI = process.env.DB_URI.replace(
+  '<dbname>',
+  process.env.DB_NAME
+).replace('<password>', process.env.DB_PASS);
 
-// Connect to database
-mongoose
-  .connect(DB, {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then((con) => {
-    console.log(`Database connected ✔ | ${con.connections[0].name}`);
-  });
+const connectDB = async () => {
+  try {
+    await mongoose.connect(DB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+    });
+    console.log('Database connected ✅');
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+};
+// Connection to DB
+connectDB();
 
 // Listening
 const port = process.env.PORT || 3000;
